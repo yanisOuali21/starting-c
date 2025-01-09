@@ -8,6 +8,7 @@ void* printBonjour(void* arg) {
     for (int i = 0; i < ITERATIONS; i++) {
         printf("Bonjour\n");
     }
+    printf("Le thread 'Bonjour' est terminé.\n"); // Message de fin pour le thread 1
     return NULL;
 }
 
@@ -16,6 +17,7 @@ void* printAuRevoir(void* arg) {
     for (int i = 0; i < ITERATIONS; i++) {
         printf("Au revoir\n");
     }
+    printf("Le thread 'Au revoir' est terminé.\n"); // Message de fin pour le thread 2
     return NULL;
 }
 
