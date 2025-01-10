@@ -1,116 +1,93 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
-#define MAX_PERSONNES 100
+#define MAX_COMPTES 100
+#define MAX_LONGUEUR_MDP 50
 
-// Structure pour représenter une personne
+// Structure pour stocker les informations d'un compte
 typedef struct {
-    char nom[50];
-    char telephone[15];
-} Personne;
+    char service[50]; // Le nom du service (ex : Gmail, Facebook)
+    char username[50]; // Nom d'utilisateur
+    char password[MAX_LONGUEUR_MDP]; // Mot de passe
+} Compte;
 
 // Variables globales
-Personne repertoire[MAX_PERSONNES];
-int nombre_personnes = 0;
+Compte comptes[MAX_COMPTES];
+int nombre_comptes = 0;
 
-// Fonction pour ajouter une personne
-void Creer_Enregistrement() {
-    if (nombre_personnes >= MAX_PERSONNES) {
-        printf("Répertoire plein, impossible d'ajouter une nouvelle personne.\n");
+// Fonction pour vérifier la robustesse d'un mot de passe
+int Verifier_Robustesse(const char *mdp) {
+    int longueur = strlen(mdp);
+    int majuscule = 0, minuscule = 0, chiffre = 0, caractere_special = 0;
+
+    if (longueur < 8) return 0; // Trop court
+
+    for (int i = 0; i < longueur; i++) {
+        if (isupper(mdp[i])) majuscule = 1;
+        else if (islower(mdp[i])) minuscule = 1;
+        else if (isdigit(mdp[i])) chiffre = 1;
+        else caractere_special = 1;
+    }
+
+    return (majuscule && minuscule && chiffre && caractere_special);
+}
+
+// Fonction pour ajouter un compte
+void Ajouter_Compte() {
+    if (nombre_comptes >= MAX_COMPTES) {
+        printf("Erreur : Limite de comptes atteinte.\n");
         return;
     }
 
-    Personne nouvelle_personne;
-    printf("Entrez le nom : ");
-    scanf("%s", nouvelle_personne.nom);
+    Compte nouveau_compte;
+    printf("Entrez le nom du service : ");
+    scanf(" %[^\n]", nouveau_compte.service);
 
-    printf("Entrez le numéro de téléphone : ");
-    scanf("%s", nouvelle_personne.telephone);
+    printf("Entrez le nom d'utilisateur : ");
+    scanf(" %[^\n]", nouveau_compte.username);
 
-    repertoire[nombre_personnes] = nouvelle_personne;
-    nombre_personnes++;
-    printf("Personne ajoutée avec succès !\n");
-}
+    printf("Entrez le mot de passe : ");
+    scanf(" %[^\n]", nouveau_compte.password);
 
-// Fonction pour afficher le contenu du répertoire
-void Affiche_Repertoire() {
-    if (nombre_personnes == 0) {
-        printf("Le répertoire est vide.\n");
+    if (!Verifier_Robustesse(nouveau_compte.password)) {
+        printf("Mot de passe non sécurisé. Veuillez utiliser au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.\n");
         return;
     }
 
-    printf("Contenu du répertoire :\n");
-    for (int i = 0; i < nombre_personnes; i++) {
-        printf("%d. Nom : %s, Téléphone : %s\n", i + 1, repertoire[i].nom, repertoire[i].telephone);
+    comptes[nombre_comptes] = nouveau_compte;
+    nombre_comptes++;
+    printf("Compte ajouté avec succès !\n");
+}
+
+// Fonction pour afficher tous les comptes
+void Afficher_Comptes() {
+    if (nombre_comptes == 0) {
+        printf("Aucun compte enregistré.\n");
+        return;
+    }
+
+    printf("Liste des comptes enregistrés :\n");
+    for (int i = 0; i < nombre_comptes; i++) {
+        printf("%d. Service : %s, Nom d'utilisateur : %s\n", i + 1, comptes[i].service, comptes[i].username);
     }
 }
 
-// Fonction pour rechercher une personne par nom
-void Recherche() {
-    char nom_recherche[50];
-    printf("Entrez le nom à rechercher : ");
-    scanf("%s", nom_recherche);
+// Fonction pour récupérer un mot de passe
+void Recuperer_Mot_De_Passe() {
+    char service_recherche[50];
+    printf("Entrez le nom du service : ");
+    scanf(" %[^\n]", service_recherche);
 
-    int trouve = 0;
-    for (int i = 0; i < nombre_personnes; i++) {
-        if (strcmp(repertoire[i].nom, nom_recherche) == 0) {
-            printf("Personne trouvée : Nom : %s, Téléphone : %s\n", repertoire[i].nom, repertoire[i].telephone);
-            trouve = 1;
-            break;
+    for (int i = 0; i < nombre_comptes; i++) {
+        if (strcmp(comptes[i].service, service_recherche) == 0) {
+            printf("Service : %s, Nom d'utilisateur : %s, Mot de passe : %s\n",
+                   comptes[i].service, comptes[i].username, comptes[i].password);
+            return;
         }
     }
-
-    if (!trouve) {
-        printf("Aucune personne trouvée avec le nom \"%s\".\n", nom_recherche);
-    }
-}
-
-// Fonction pour retirer une personne par nom
-void Retirer() {
-    char nom_retirer[50];
-    printf("Entrez le nom de la personne à retirer : ");
-    scanf("%s", nom_retirer);
-
-    int index = -1;
-    for (int i = 0; i < nombre_personnes; i++) {
-        if (strcmp(repertoire[i].nom, nom_retirer) == 0) {
-            index = i;
-            break;
-        }
-    }
-
-    if (index == -1) {
-        printf("Aucune personne trouvée avec le nom \"%s\".\n", nom_retirer);
-        return;
-    }
-
-    // Supprimer l'entrée et réorganiser le tableau
-    for (int i = index; i < nombre_personnes - 1; i++) {
-        repertoire[i] = repertoire[i + 1];
-    }
-    nombre_personnes--;
-    printf("Personne retirée avec succès !\n");
-}
-
-// Fonction pour charger le répertoire depuis un fichier
-void Charger_Repertoire() {
-    FILE *fichier = fopen("repertoire.txt", "r");
-    if (fichier == NULL) {
-        printf("Erreur : Impossible de lire le fichier.\n");
-        return;
-    }
-
-    nombre_personnes = 0;
-    while (fscanf(fichier, "%s %s", repertoire[nombre_personnes].nom, repertoire[nombre_personnes].telephone) != EOF) {
-        nombre_personnes++;
-        if (nombre_personnes >= MAX_PERSONNES) {
-            printf("Attention : Le fichier contient plus d'entrées que la capacité maximale (%d).\n", MAX_PERSONNES);
-            break;
-        }
-    }
-
-    fclose(fichier);
-    printf("Répertoire chargé avec succès (%d entrées).\n", nombre_personnes);
+    printf("Aucun compte trouvé pour ce service.\n");
 }
 
 // Fonction principale
@@ -119,33 +96,25 @@ int main() {
 
     while (1) {
         printf("\nQue voulez-vous faire :\n");
-        printf("* Ajouter une personne         (1)\n");
-        printf("* Afficher le répertoire       (2)\n");
-        printf("* Faire une recherche par nom  (3)\n");
-        printf("* Retirer une personne par nom (4)\n");
-        printf("* Charger le répertoire        (5)\n");
-        printf("* Terminer                     (6)\n");
+        printf("* Ajouter un compte                  (1)\n");
+        printf("* Afficher tous les comptes          (2)\n");
+        printf("* Récupérer un mot de passe          (3)\n");
+        printf("* Quitter                            (4)\n");
 
         scanf("%d", &Action);
 
         switch (Action) {
             case 1:
-                Creer_Enregistrement();
+                Ajouter_Compte();
                 break;
             case 2:
-                Affiche_Repertoire();
+                Afficher_Comptes();
                 break;
             case 3:
-                Recherche();
+                Recuperer_Mot_De_Passe();
                 break;
             case 4:
-                Retirer();
-                break;
-            case 5:
-                Charger_Repertoire();
-                break;
-            case 6:
-                printf("Terminé...\n");
+                printf("Au revoir !\n");
                 return 0;
             default:
                 printf("Option invalide. Veuillez réessayer.\n");
