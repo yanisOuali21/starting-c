@@ -61,7 +61,7 @@ void Ajouter_Compte() {
     printf("Compte ajouté avec succès !\n");
 }
 
-// Fonction pour afficher tous les comptes
+// Fonction pour afficher tous les compte
 void Afficher_Comptes() {
     if (nombre_comptes == 0) {
         printf("Aucun compte enregistré.\n");
@@ -69,10 +69,13 @@ void Afficher_Comptes() {
     }
 
     printf("Liste des comptes enregistrés :\n");
+    Compte *ptr = comptes; // Pointeur pour parcourir le tableau
     for (int i = 0; i < nombre_comptes; i++) {
-        printf("%d. Service : %s, Nom d'utilisateur : %s\n", i + 1, comptes[i].service, comptes[i].username);
+        printf("%d. Service : %s, Nom d'utilisateur : %s\n", i + 1, ptr->service, ptr->username);
+        ptr++; // Incrémentation du pointeur pour passer au compte suivant
     }
 }
+
 
 // Fonction pour récupérer un mot de passe
 void Recuperer_Mot_De_Passe() {
